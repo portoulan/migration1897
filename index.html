@@ -182,6 +182,18 @@ fetch('data.geojson')
     map.fitBounds(layer.getBounds());
   });
     
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leflet.migration';
+const data = [
+  {
+    labels: ['from', 'to'],
+    from: [40.9, 51.1],
+    to: [76.2, 43.9],
+    color: '',
+    value: '',
+  },
+];
   </script>
 
 </body>
