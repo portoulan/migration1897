@@ -174,11 +174,14 @@
       .addTo(map)
       .bindPopup("Вы здесь");
     });
+    
 fetch('data.geojson')
-  .then(response => response.json())
+  .then(r => r.json())
   .then(data => {
-    L.geoJSON(data).addTo(map);
+    const layer = L.geoJSON(data).addTo(map);
+    map.fitBounds(layer.getBounds());
   });
+    
   </script>
 
 </body>
