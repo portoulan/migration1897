@@ -45,6 +45,7 @@
     L.marker([68.7558, 105.6176])
   .addTo(map);
 </script>
-
+var cities = L.layerGroup([data.geojson]);
+var layerControl = L.control.layers(cities).addTo(map);
 </body>
 </html>
