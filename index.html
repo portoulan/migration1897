@@ -181,7 +181,31 @@ fetch('data.geojson')
     const layer = L.geoJSON(data).addTo(map);
     map.fitBounds(layer.getBounds());
   });
-    
+    const data = [
+  {
+    labels: ['from', 'to'],
+    from: [lat, lng],
+    to: [lat, lng],
+    color: '',
+    value: '',
+  },
+];
+const popover = document.querySelector('.popover');
+const options = {
+  marker: {
+    radius: [5, 10],
+    pulse: true,
+    textVisible: true
+  },
+  line: {
+    width: 1,
+    order: false,
+    icon: {
+      type: 'arrow',
+      imgUrl: '',
+      size: 20
+    },
+  };
   </script>
 
 </body>
