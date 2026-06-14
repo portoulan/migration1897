@@ -43,34 +43,83 @@ fetch('data.geojson')
     const layer = L.geoJSON(data).addTo(map);
     map.fitBounds(layer.getBounds());
   });
-const point1 = [55.7558, 37.6176]; // Москва
-const point2 = [59.9343, 30.3351]; // Санкт-Петербург
+let migrationData = [];
 
-// Линия
-const line = L.polyline([point1, point2], {
-    color: 'red',
-    weight: 3
-}).addTo(map);
+Papa.parse('Migration.csv', {
+    download: true,
+    header: true,
+    complete: function(results) {
+        migrationData = results.data;
+    }
+});
+    
+const featureCenters = {};
 
-// Наконечник стрелки
-L.polylineDecorator(line, {
-    patterns: [
+function onEachFeature(feature, layer) {
+
+    const id = feature.properties.id;
+
+    featureCenters[id] = layer.getBounds().getCenter();
+
+    layer.on('click', onRegionClick);
+}
+function drawArrow(start, end, weight) {
+
+    const line = L.polyline(
+        [start, end],
         {
+            color: 'red',
+            weight: weight
+        }
+    ).addTo(map);
+
+    L.polylineDecorator(line, {
+        patterns: [{
             offset: '100%',
             repeat: 0,
             symbol: L.Symbol.arrowHead({
-                pixelSize: 15,
-                polygon: true,
-                pathOptions: {
-                    color: 'red',
-                    fillOpacity: 1,
-                    weight: 2
-                }
+                pixelSize: 10 + weight,
+                polygon: true
             })
-        }
-    ]
-}).addTo(map);
-</script>
+        }]
+    }).addTo(map);
+}
+function onRegionClick(e) {
 
+    const destination =
+        e.target.feature.properties.id;
+
+    const flows = migrationData.filter(
+        row => row.destination === destination
+    );
+
+    flows.forEach(flow => {
+
+        const start =
+            featureCenters[flow.origin];
+
+        const end =
+            featureCenters[flow.destination];
+
+        if (!start || !end) return;
+
+        const weight =
+            Math.max(
+                1,
+                Number(flow.number) / 50
+            );
+
+        drawArrow(start, end, weight);
+    });
+}
+const values = migrationData.map(
+    d => Number(d.number)
+);
+
+const maxValue = Math.max(...values);
+
+const weight =
+    1 + 9 * Number(flow.number) / maxValue;
+</script>
 </body>
 </html>
