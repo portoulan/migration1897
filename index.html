@@ -43,6 +43,7 @@ fetch('data.geojson')
     const layer = L.geoJSON(data).addTo(map);
     map.fitBounds(layer.getBounds());
   });
+    
 let migrationData = [];
 
 Papa.parse('Migration.csv', {
@@ -57,9 +58,9 @@ const featureCenters = {};
 
 function onEachFeature(feature, layer) {
 
-    const id = feature.properties.id;
+    const id = feature.properties.prov_ENG;
 
-    featureCenters[id] = layer.getBounds().getCenter();
+    featureCenters[prov_ENG] = layer.getBounds().getCenter();
 
     layer.on('click', onRegionClick);
 }
@@ -87,7 +88,7 @@ function drawArrow(start, end, weight) {
 function onRegionClick(e) {
 
     const destination =
-        e.target.feature.properties.id;
+        e.target.feature.properties.prov_ENG;
 
     const flows = migrationData.filter(
         row => row.destination === destination
