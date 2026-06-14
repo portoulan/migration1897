@@ -1,212 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя карта</title>
 
-  <title>Интерактивная карта</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-  <!-- Leaflet -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet/dist/leaflet.css"
-  />
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    /* Боковая панель */
-    .sidebar {
-      width: 320px;
-      background: #ffffff;
-      border-right: 1px solid #ddd;
-      padding: 20px;
-      overflow-y: auto;
-    }
-
-    .sidebar h1 {
-      font-size: 24px;
-      margin-bottom: 15px;
-    }
-
-    .sidebar p {
-      color: #555;
-      margin-bottom: 20px;
-      line-height: 1.5;
-    }
-
-    .location-card {
-      background: #f7f7f7;
-      border-radius: 10px;
-      padding: 15px;
-      margin-bottom: 15px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .location-card:hover {
-      background: #ececec;
-    }
-
-    .location-card h3 {
-      margin-bottom: 8px;
-    }
-
-    /* Карта */
-    #map {
-      flex: 1;
-    }
-
-    /* Мобильная версия */
-    @media (max-width: 768px) {
-      body {
-        flex-direction: column;
-      }
-
-      .sidebar {
-        width: 100%;
-        height: 250px;
-      }
-
-      #map {
-        height: calc(100vh - 250px);
-      }
-    }
-  </style>
+    <style>
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Боковая панель -->
-  <div class="sidebar">
-    <h1>Моя карта</h1>
+<div id="map"></div>
 
-    <p>
-      Пример сайта с интерактивной картой.
-      Нажмите на карточку для перехода к точке.
-    </p>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <div class="location-card" onclick="goToLocation(52.5185, 5.4714, 'Lelystad')">
-      <h3>Lelystad</h3>
-      <p>Центр города</p>
-    </div>
+<script>
+    // Создаем карту
+    const map = L.map('map').setView([55.7558, 37.6176], 10);
 
-    <div class="location-card" onclick="goToLocation(52.3702, 4.8952, 'Amsterdam')">
-      <h3>Amsterdam</h3>
-      <p>Столица Нидерландов</p>
-    </div>
-
-    <div class="location-card" onclick="goToLocation(51.9244, 4.4777, 'Rotterdam')">
-      <h3>Rotterdam</h3>
-      <p>Крупный порт</p>
-    </div>
-  </div>
-
-  <!-- Карта -->
-  <div id="map"></div>
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-  <script>
-    // Создание карты
-    const map = L.map('map').setView([52.5185, 5.4714], 7);
-
-    // Слой OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
+    // Подложка OpenStreetMap
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Массив точек
-    const locations = [
-      {
-        name: "Lelystad",
-        coords: [52.5185, 5.4714],
-        description: "Центр города"
-      },
-      {
-        name: "Amsterdam",
-        coords: [52.3702, 4.8952],
-        description: "Столица Нидерландов"
-      },
-      {
-        name: "Rotterdam",
-        coords: [51.9244, 4.4777],
-        description: "Крупный порт"
-      }
-    ];
-
-    // Добавление маркеров
-    locations.forEach(location => {
-      L.marker(location.coords)
+    // Маркер
+    L.marker([55.7558, 37.6176])
         .addTo(map)
-        .bindPopup(`
-          <b>${location.name}</b><br>
-          ${location.description}
-        `);
-    });
-
-    // Переход к точке
-    function goToLocation(lat, lng, name) {
-      map.setView([lat, lng], 12);
-
-      L.popup()
-        .setLatLng([lat, lng])
-        .setContent(`<b>${name}</b>`)
-        .openOn(map);
-    }
-
-    // Геолокация пользователя
-    map.locate({ setView: false });
-
-    map.on('locationfound', function(e) {
-      L.circleMarker(e.latlng, {
-        radius: 8
-      })
-      .addTo(map)
-      .bindPopup("Вы здесь");
-    });
-    
+        .bindPopup('Москва')
+        .openPopup();
 fetch('data.geojson')
   .then(r => r.json())
   .then(data => {
     const layer = L.geoJSON(data).addTo(map);
     map.fitBounds(layer.getBounds());
   });
-    const data = [
-  {
-    labels: ['from', 'to'],
-    from: [lat, lng],
-    to: [lat, lng],
-    color: '',
-    value: '',
-  },
-];
-const popover = document.querySelector('.popover');
-const options = {
-  marker: {
-    radius: [5, 10],
-    pulse: true,
-    textVisible: true
-  },
-  line: {
-    width: 1,
-    order: false,
-    icon: {
-      type: 'arrow',
-      imgUrl: '',
-      size: 20
-    },
-  };
-  </script>
+const point1 = [55.7558, 37.6176]; // Москва
+const point2 = [59.9343, 30.3351]; // Санкт-Петербург
+
+// Линия
+const line = L.polyline([point1, point2], {
+    color: 'red',
+    weight: 3
+}).addTo(map);
+
+// Наконечник стрелки
+L.polylineDecorator(line, {
+    patterns: [
+        {
+            offset: '100%',
+            repeat: 0,
+            symbol: L.Symbol.arrowHead({
+                pixelSize: 15,
+                polygon: true,
+                pathOptions: {
+                    color: 'red',
+                    fillOpacity: 1,
+                    weight: 2
+                }
+            })
+        }
+    ]
+}).addTo(map);
+</script>
 
 </body>
 </html>
