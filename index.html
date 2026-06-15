@@ -9,11 +9,16 @@
 <title>Неместные урожкенцы 1897г.</title>
 
 <div id="map"></div>
-<script>     
-#map{
-    height:100vh;
-    width:100%;
+
+<style>
+#map {
+    height: 100vh;
+    width: 100%;
 }
+</style>
+
+<script>     
+
 const map = L.map('map').setView([60, 90], 3);
 
 L.tileLayer(
@@ -55,15 +60,14 @@ Papa.parse('Migration.csv', {
             'Migration rows:',
             migrationData.length
         );
+          console.log(
+        [...new Set(
+            migrationData.map(x => x.Origin)
+        )]
+    );
     }
 });
-console.log(
-    [...new Set(
-        migrationData.map(
-            x => x.Origin
-        )
-    )]
-);
+
 fetch('data.geojson')
     .then(response => response.json())
     .then(data => {
@@ -80,11 +84,12 @@ fetch('data.geojson')
             onEachFeature
 
         }).addTo(map);
+        console.log(
+        Object.keys(regionCenters)
+    );
 
     });
-console.log(
-    Object.keys(regionCenters)
-);
+
 function onEachFeature(feature, layer){
 
     const region =
