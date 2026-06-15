@@ -1,126 +1,189 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Моя карта</title>
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
-    <style>
-        #map {
-            height: 100vh;
-            width: 100%;
-        }
-    </style>
-</head>
-<body>
-
-<div id="map"></div>
-
-<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script>
-    // Создаем карту
-    const map = L.map('map').setView([55.7558, 37.6176], 10);
+<script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
 
-    // Подложка OpenStreetMap
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+<script src="https://unpkg.com/leaflet-polylinedecorator/dist/leaflet.polylineDecorator.min.js"></script>
+<div id="map"></div>
+#map{
+    height:100vh;
+    width:100%;
+}
+const map = L.map('map').setView([60, 90], 3);
 
-    // Маркер
-    L.marker([55.7558, 37.6176])
-        .addTo(map)
-        .bindPopup('Москва')
-        .openPopup();
-fetch('data.geojson')
-  .then(r => r.json())
-  .then(data => {
-    const layer = L.geoJSON(data).addTo(map);
-    map.fitBounds(layer.getBounds());
-  });
-    
+L.tileLayer(
+    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+        attribution:'© OpenStreetMap'
+    }
+).addTo(map);
+
 let migrationData = [];
+let maxNumber = 0;
 
+const regionCenters = {};
+
+const arrowsLayer = L.layerGroup().addTo(map);
 Papa.parse('Migration.csv', {
     download: true,
     header: true,
-    complete: function(results) {
-        migrationData = results.data;
+    delimiter: ';',
+    dynamicTyping: true,
+
+    complete: function(results){
+
+        migrationData = results.data.filter(
+            row =>
+                row.Origin &&
+                row.Destination &&
+                row.Number
+        );
+
+        maxNumber = Math.max(
+            ...migrationData.map(
+                row => Number(row.Number)
+            )
+        );
+
+        console.log(
+            'Migration rows:',
+            migrationData.length
+        );
     }
 });
-    
-const featureCenters = {};
+console.log(
+    [...new Set(
+        migrationData.map(
+            x => x.Origin
+        )
+    )]
+);
+fetch('R18971.geojson')
+    .then(response => response.json())
+    .then(data => {
 
-function onEachFeature(feature, layer) {
+        L.geoJSON(data, {
 
-    const id = feature.properties.prov_ENG;
+            style: {
+                color: '#666',
+                weight: 1,
+                fillColor: '#e5e5e5',
+                fillOpacity: 0.7
+            },
 
-    featureCenters[prov_ENG] = layer.getBounds().getCenter();
+            onEachFeature
+
+        }).addTo(map);
+
+    });
+console.log(
+    Object.keys(regionCenters)
+);
+function onEachFeature(feature, layer){
+
+    const region =
+        feature.properties.prov_ENG;
+
+    regionCenters[region] =
+        layer.getBounds().getCenter();
 
     layer.on('click', onRegionClick);
-}
-function drawArrow(start, end, weight) {
 
-    const line = L.polyline(
-        [start, end],
-        {
-            color: 'red',
-            weight: weight
-        }
-    ).addTo(map);
-
-    L.polylineDecorator(line, {
-        patterns: [{
-            offset: '100%',
-            repeat: 0,
-            symbol: L.Symbol.arrowHead({
-                pixelSize: 10 + weight,
-                polygon: true
-            })
-        }]
-    }).addTo(map);
+    layer.bindTooltip(region);
 }
-function onRegionClick(e) {
+function onRegionClick(e){
+
+    arrowsLayer.clearLayers();
 
     const destination =
         e.target.feature.properties.prov_ENG;
 
-    const flows = migrationData.filter(
-        row => row.destination === destination
+    const flows =
+        migrationData.filter(
+            row =>
+                row.Destination === destination
+        );
+
+    console.log(
+        destination,
+        flows.length
     );
 
     flows.forEach(flow => {
 
         const start =
-            featureCenters[flow.origin];
+            regionCenters[flow.Origin];
 
         const end =
-            featureCenters[flow.destination];
+            regionCenters[flow.Destination];
 
-        if (!start || !end) return;
-
-        const weight =
-            Math.max(
-                1,
-                Number(flow.number) / 50
+        if(!start || !end){
+            console.warn(
+                'Region not found:',
+                flow.Origin,
+                flow.Destination
             );
+            return;
+        }
 
-        drawArrow(start, end, weight);
+        drawArrow(
+            start,
+            end,
+            Number(flow.Number)
+        );
     });
 }
-const values = migrationData.map(
-    d => Number(d.number)
-);
+function drawArrow(
+    start,
+    end,
+    value
+){
 
-const maxValue = Math.max(...values);
+    const weight =
+        1 + 9 * value / maxNumber;
 
-const weight =
-    1 + 9 * Number(flow.number) / maxValue;
-</script>
-</body>
-</html>
+    const line =
+        L.polyline(
+            [start, end],
+            {
+                color: '#d32f2f',
+                weight: weight,
+                opacity: 0.8
+            }
+        );
+
+    arrowsLayer.addLayer(line);
+
+    const decorator =
+        L.polylineDecorator(
+            line,
+            {
+                patterns: [
+                    {
+                        offset: '100%',
+                        repeat: 0,
+
+                        symbol:
+                            L.Symbol.arrowHead({
+                                pixelSize:
+                                    8 + weight,
+
+                                polygon: true,
+
+                                pathOptions:{
+                                    color:'#d32f2f',
+                                    fillOpacity:1,
+                                    weight:1
+                                }
+                            })
+                    }
+                ]
+            }
+        );
+
+    arrowsLayer.addLayer(
+        decorator
+    );
+}
