@@ -6,8 +6,10 @@
 <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
 
 <script src="https://unpkg.com/leaflet-polylinedecorator/dist/leaflet.polylineDecorator.min.js"></script>
-<script>
+<title>Неместные урожкенцы 1897г.</title>
+
 <div id="map"></div>
+<script>     
 #map{
     height:100vh;
     width:100%;
@@ -27,6 +29,7 @@ let maxNumber = 0;
 const regionCenters = {};
 
 const arrowsLayer = L.layerGroup().addTo(map);
+      
 Papa.parse('Migration.csv', {
     download: true,
     header: true,
@@ -61,7 +64,7 @@ console.log(
         )
     )]
 );
-fetch('R18971.geojson')
+fetch('data.geojson')
     .then(response => response.json())
     .then(data => {
 
