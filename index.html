@@ -4,7 +4,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://unpkg.com/leaflet-polylinedecorator/dist/leaflet.polylineDecorator.min.js"></script>
-<title>Неместные урожкенцы 1897г.</title>
 
 <div id="map"></div>
 
@@ -142,12 +141,6 @@ function onRegionClick(e) {
     const flows = state.migrationIndex[destination];
 
     resetStyles();
-   function clearValueTooltips() {
-    state.valueTooltips.forEach(t => {
-        if (t && t.remove) t.remove();
-    });
-    state.valueTooltips = [];
-} // 🔥 очищаем старые числа
 
     if (!flows) return;
 
@@ -157,29 +150,22 @@ function onRegionClick(e) {
         const layer = state.regionLayers[flow.origin];
         if (!layer) return;
 
-        // 🔹 подсветка полигона
         layer.setStyle({
             fillColor: getColor(flow.number, maxNumber),
             fillOpacity: 0.8,
             color: '#444',
             weight: 1
         });
+    });
 
-        // 🔥 ДОБАВЛЯЕМ ЧИСЛО НА ПОЛИГОН
-        const center = layer.getBounds().getCenter();
-
-        const tooltip = L.tooltip({
-            permanent: true,
-            direction: 'center',
-            className: 'value-label'
-        })
-        .setLatLng(center)
-        .setContent(String(flow.number))
-        .addTo(map);
-
-        state.valueTooltips.push(tooltip);
+    e.target.setStyle({
+        fillColor: 'yellow',
+        fillOpacity: 0.9,
+        color: '#000',
+        weight: 3
     });
 }
+
 // -------------------------
 // 🔹 Основной запуск
 // -------------------------
