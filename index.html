@@ -141,6 +141,7 @@ function onRegionClick(e) {
     const flows = state.migrationIndex[destination];
 
     resetStyles();
+    clearValueTooltips(); // 🔥 очищаем старые числа
 
     if (!flows) return;
 
@@ -150,21 +151,28 @@ function onRegionClick(e) {
         const layer = state.regionLayers[flow.origin];
         if (!layer) return;
 
+        // 🔹 подсветка полигона
         layer.setStyle({
             fillColor: getColor(flow.number, maxNumber),
             fillOpacity: 0.8,
             color: '#444',
             weight: 1
         });
-    });
 
-    e.target.setStyle({
-        fillColor: 'yellow',
-        fillOpacity: 0.9,
-        color: '#000',
-        weight: 3
+        // 🔥 ДОБАВЛЯЕМ ЧИСЛО НА ПОЛИГОН
+        const center = layer.getBounds().getCenter();
+
+        const tooltip = L.tooltip({
+            permanent: true,
+            direction: 'center',
+            className: 'value-label'
+        })
+        .setLatLng(center)
+        .setContent(String(flow.number))
+        .addTo(map);
+
+        state.valueTooltips.push(tooltip);
     });
-}
 
 // -------------------------
 // 🔹 Основной запуск
