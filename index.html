@@ -142,7 +142,12 @@ function onRegionClick(e) {
     const flows = state.migrationIndex[destination];
 
     resetStyles();
-    clearValueTooltips(); // 🔥 очищаем старые числа
+   function clearValueTooltips() {
+    state.valueTooltips.forEach(t => {
+        if (t && t.remove) t.remove();
+    });
+    state.valueTooltips = [];
+} // 🔥 очищаем старые числа
 
     if (!flows) return;
 
