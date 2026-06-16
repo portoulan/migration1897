@@ -4,12 +4,48 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
 <title>Неместные уроженцы 1897г.</title>
+
+<div id="header">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia_%281889%E2%80%931917%29.svg"
+         alt="Flag"
+         id="flag">
+    <div id="title">Неместные уроженцы 1897 г.</div>
+</div>
+
 <div id="map"></div>
 
 <style>
 #map {
     height: 100vh;
     width: 100%;
+}
+#header {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    background: rgba(255,255,255,0.85);
+    padding: 8px 12px;
+    border-radius: 8px;
+
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    font-family: sans-serif;
+}
+
+#flag {
+    width: 40px;
+    height: auto;
+    border-radius: 3px;
+}
+
+#title {
+    font-size: 16px;
+    font-weight: 700;
 }
 
 /* 🔥 числовые labels */
@@ -21,7 +57,7 @@
 
 .value-label div {
     font-size: 15px;
-    font-weight: 800;
+    font-weight: 700;
     color: #111;
     text-shadow: 0 0 3px white;
     white-space: nowrap;
