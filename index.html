@@ -3,14 +3,28 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
-<script src="https://unpkg.com/leaflet-polylinedecorator/dist/leaflet.polylineDecorator.min.js"></script>
-
+<title>Неместные уроженцы 1897г.</title>
 <div id="map"></div>
 
 <style>
 #map {
     height: 100vh;
     width: 100%;
+}
+
+/* 🔥 числовые labels */
+.value-label {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.value-label div {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111;
+    text-shadow: 0 0 3px white;
+    white-space: nowrap;
 }
 </style>
 
@@ -21,10 +35,13 @@ const state = {
     migrationIndex: {},
     regionLayers: {},
     geoData: null,
-    csvData: null
+    csvData: null,
+    valueLabels: []
 };
 
-// 🔹 Нормализация ключей (ВАЖНО для matching)
+// -------------------------
+// 🔹 нормализация строк
+// -------------------------
 function norm(str) {
     return (str ?? "")
         .toString()
@@ -33,7 +50,7 @@ function norm(str) {
 }
 
 // -------------------------
-// 🔹 Загрузка CSV через Promise
+// 🔹 CSV loader
 // -------------------------
 function loadCSV(url) {
     return new Promise((resolve, reject) => {
@@ -49,7 +66,7 @@ function loadCSV(url) {
 }
 
 // -------------------------
-// 🔹 Загрузка GeoJSON
+// 🔹 GeoJSON loader
 // -------------------------
 async function loadGeoJSON(url) {
     const res = await fetch(url);
@@ -58,7 +75,7 @@ async function loadGeoJSON(url) {
 }
 
 // -------------------------
-// 🔹 Подготовка данных
+// 🔹 индекс миграций
 // -------------------------
 function buildMigrationIndex(rows) {
     const index = {};
@@ -69,6 +86,8 @@ function buildMigrationIndex(rows) {
         const number = Number(row.Number);
 
         if (!destination || !origin) return;
+        if (isNaN(number)) return;
+
         if (!index[destination]) index[destination] = [];
 
         index[destination].push({ origin, number });
@@ -78,7 +97,7 @@ function buildMigrationIndex(rows) {
 }
 
 // -------------------------
-// 🔹 Инициализация карты
+// 🔹 карта
 // -------------------------
 function initMap() {
     map = L.map('map').setView([60, 90], 3);
@@ -89,21 +108,42 @@ function initMap() {
 }
 
 // -------------------------
-// 🔹 GeoJSON обработка
+// 🔹 очистка labels
 // -------------------------
-function onEachFeature(feature, layer) {
-    const region = norm(feature.properties.prov_ENG);
-
-    if (!region) return;
-
-    state.regionLayers[region] = layer;
-
-    layer.bindTooltip(feature.properties.prov_ENG);
-    layer.on('click', onRegionClick);
+function clearValueLabels() {
+    state.valueLabels.forEach(l => l.remove());
+    state.valueLabels = [];
 }
 
 // -------------------------
-// 🔹 Цвет
+// 🔹 безопасный центр
+// -------------------------
+function getSafeCenter(layer) {
+    if (!layer || !layer.getBounds) return null;
+    return layer.getBounds().getCenter();
+}
+
+// -------------------------
+// 🔹 создание label
+// -------------------------
+function createLabel(latlng, value) {
+    const icon = L.divIcon({
+        className: 'value-label',
+        html: `<div>${value}</div>`
+    });
+
+    const marker = L.marker(latlng, {
+        icon,
+        interactive: false
+    }).addTo(map);
+
+    state.valueLabels.push(marker);
+
+    return marker;
+}
+
+// -------------------------
+// 🔹 цвет
 // -------------------------
 function getColor(value, max) {
     if (!max) return '#FD8D3C';
@@ -119,7 +159,7 @@ function getColor(value, max) {
 }
 
 // -------------------------
-// 🔹 Сброс стилей
+// 🔹 сброс стилей
 // -------------------------
 function resetStyles() {
     Object.values(state.regionLayers).forEach(layer => {
@@ -133,18 +173,33 @@ function resetStyles() {
 }
 
 // -------------------------
-// 🔹 Клик по региону
+// 🔹 GeoJSON обработка
+// -------------------------
+function onEachFeature(feature, layer) {
+    const region = norm(feature.properties.prov_ENG);
+
+    if (!region) return;
+
+    state.regionLayers[region] = layer;
+
+    layer.bindTooltip(feature.properties.prov_ENG || "Unknown");
+    layer.on('click', onRegionClick);
+}
+
+// -------------------------
+// 🔹 клик по региону
 // -------------------------
 function onRegionClick(e) {
     const destination = norm(e.target.feature.properties.prov_ENG);
-
     const flows = state.migrationIndex[destination];
 
     resetStyles();
+    clearValueLabels();
 
-    if (!flows) return;
+    if (!flows || !flows.length) return;
 
-    const maxNumber = Math.max(...flows.map(f => f.number || 0));
+    const values = flows.map(f => f.number || 0);
+    const maxNumber = values.length ? Math.max(...values) : 0;
 
     flows.forEach(flow => {
         const layer = state.regionLayers[flow.origin];
@@ -156,6 +211,11 @@ function onRegionClick(e) {
             color: '#444',
             weight: 1
         });
+
+        const center = getSafeCenter(layer);
+        if (!center) return;
+
+        createLabel(center, flow.number);
     });
 
     e.target.setStyle({
@@ -167,13 +227,12 @@ function onRegionClick(e) {
 }
 
 // -------------------------
-// 🔹 Основной запуск
+// 🔹 запуск
 // -------------------------
 async function init() {
     initMap();
 
     try {
-        // 🔥 Параллельная загрузка данных
         const [geoData, csvResult] = await Promise.all([
             loadGeoJSON('data.geojson'),
             loadCSV('Migration.csv')
@@ -182,10 +241,8 @@ async function init() {
         state.geoData = geoData;
         state.csvData = csvResult.data;
 
-        // 🔹 строим индекс (кешируем)
         state.migrationIndex = buildMigrationIndex(state.csvData);
 
-        // 🔹 добавляем GeoJSON
         L.geoJSON(geoData, {
             style: {
                 color: '#666',
@@ -196,15 +253,13 @@ async function init() {
             onEachFeature
         }).addTo(map);
 
-        console.log("Loaded regions:", Object.keys(state.regionLayers).length);
-        console.log("Migration keys:", Object.keys(state.migrationIndex).length);
+        console.log("Regions:", Object.keys(state.regionLayers).length);
+        console.log("Migration groups:", Object.keys(state.migrationIndex).length);
 
     } catch (err) {
         console.error("Init error:", err);
     }
 }
 
-// 🔥 старт
 init();
-
 </script>
