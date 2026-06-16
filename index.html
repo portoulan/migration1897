@@ -21,20 +21,8 @@
 
 const map = L.map('map').setView([60, 90], 3);
 
-L.tileLayer(
-    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    {
-        attribution:'© OpenStreetMap'
-    }
-).addTo(map);
+let migrationIndex = {};
 
-let migrationData = [];
-let maxNumber = 0;
-
-const regionCenters = {};
-
-const arrowsLayer = L.layerGroup().addTo(map);
-      
 Papa.parse('Migration.csv', {
     download: true,
     header: true,
@@ -43,157 +31,108 @@ Papa.parse('Migration.csv', {
 
     complete: function(results){
 
-        migrationData = results.data.filter(
-            row =>
-                row.Origin &&
-                row.Destination &&
-                row.Number
-        );
+        results.data.forEach(row => {
 
-        maxNumber = Math.max(
-            ...migrationData.map(
-                row => Number(row.Number)
-            )
-        );
+            const destination =
+                row.Destination?.trim();
 
-        console.log(
-            'Migration rows:',
-            migrationData.length
-        );
-          console.log(
-        [...new Set(
-            migrationData.map(x => x.Origin)
-        )]
-    );
+            if(!migrationIndex[destination]){
+                migrationIndex[destination] = [];
+            }
+
+            migrationIndex[destination].push({
+                origin: row.Origin.trim(),
+                number: Number(row.Number)
+            });
+
+        });
+
+        console.log(migrationIndex);
     }
 });
 
-fetch('data.geojson')
-    .then(response => response.json())
-    .then(data => {
-
-        L.geoJSON(data, {
-
-            style: {
-                color: '#666',
-                weight: 1,
-                fillColor: '#e5e5e5',
-                fillOpacity: 0.7
-            },
-
-            onEachFeature
-
-        }).addTo(map);
-        console.log(
-        Object.keys(regionCenters)
-    );
-
-    });
-
+const regionLayers = {};
 function onEachFeature(feature, layer){
 
     const region =
         feature.properties.prov_ENG;
 
-    regionCenters[region] =
-        layer.getBounds().getCenter();
+    regionLayers[region] = layer;
 
     layer.on('click', onRegionClick);
 
     layer.bindTooltip(region);
 }
+function getColor(value, max){
+
+    const k = value / max;
+
+    if(k > 0.8) return '#800026';
+    if(k > 0.6) return '#BD0026';
+    if(k > 0.4) return '#E31A1C';
+    if(k > 0.2) return '#FC4E2A';
+
+    return '#FD8D3C';
+}
+function resetStyles(){
+
+    Object.values(regionLayers)
+        .forEach(layer => {
+
+            layer.setStyle({
+                color:'#666',
+                weight:1,
+                fillColor:'#e5e5e5',
+                fillOpacity:0.7
+            });
+
+        });
+}
 function onRegionClick(e){
 
-    arrowsLayer.clearLayers();
+    resetStyles();
 
     const destination =
         e.target.feature.properties.prov_ENG;
 
     const flows =
-        migrationData.filter(
-            row =>
-                row.Destination === destination
-        );
+        migrationIndex[destination];
 
-    console.log(
-        destination,
-        flows.length
-    );
+    if(!flows) return;
+
+    const maxNumber =
+        Math.max(
+            ...flows.map(
+                x => x.number
+            )
+        );
 
     flows.forEach(flow => {
 
-        const start =
-            regionCenters[flow.Origin];
+        const layer =
+            regionLayers[flow.origin];
 
-        const end =
-            regionCenters[flow.Destination];
+        if(!layer) return;
 
-        if(!start || !end){
-            console.warn(
-                'Region not found:',
-                flow.Origin,
-                flow.Destination
-            );
-            return;
-        }
+        layer.setStyle({
+            fillColor:
+                getColor(
+                    flow.number,
+                    maxNumber
+                ),
+            fillOpacity:0.8,
+            color:'#444',
+            weight:1
+        });
 
-        drawArrow(
-            start,
-            end,
-            Number(flow.Number)
-        );
+    });
+
+    e.target.setStyle({
+        fillColor:'yellow',
+        fillOpacity:0.9,
+        color:'#000',
+        weight:3
     });
 }
-function drawArrow(
-    start,
-    end,
-    value
-){
 
-    const weight =
-        1 + 9 * value / maxNumber;
-
-    const line =
-        L.polyline(
-            [start, end],
-            {
-                color: '#d32f2f',
-                weight: weight,
-                opacity: 0.8
-            }
-        );
-
-    arrowsLayer.addLayer(line);
-
-    const decorator =
-        L.polylineDecorator(
-            line,
-            {
-                patterns: [
-                    {
-                        offset: '100%',
-                        repeat: 0,
-
-                        symbol:
-                            L.Symbol.arrowHead({
-                                pixelSize:
-                                    8 + weight,
-
-                                polygon: true,
-
-                                pathOptions:{
-                                    color:'#d32f2f',
-                                    fillOpacity:1,
-                                    weight:1
-                                }
-                            })
-                    }
-                ]
-            }
-        );
-
-    arrowsLayer.addLayer(
-        decorator
-    );
-}
 </script>
