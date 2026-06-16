@@ -2,11 +2,8 @@
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
-
 <script src="https://unpkg.com/leaflet-polylinedecorator/dist/leaflet.polylineDecorator.min.js"></script>
-<title>Неместные урожкенцы 1897г.</title>
 
 <div id="map"></div>
 
@@ -18,165 +15,196 @@
 </style>
 
 <script>
-      
-const map =
-    L.map('map')
-     .setView([60, 90], 3);
+let map;
 
-L.tileLayer(
-    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    {
-        attribution:'© OpenStreetMap'
-    }
-).addTo(map);
+const state = {
+    migrationIndex: {},
+    regionLayers: {},
+    geoData: null,
+    csvData: null
+};
 
-let migrationIndex = {};
-const regionLayers = {};
+// 🔹 Нормализация ключей (ВАЖНО для matching)
+function norm(str) {
+    return (str ?? "")
+        .toString()
+        .trim()
+        .toLowerCase();
+}
 
-Papa.parse('Migration.csv', {
-    download: true,
-    header: true,
-    delimiter: ';',
-    dynamicTyping: true,
-
-    complete: function(results){
-
-        results.data.forEach(row => {
-
-            const destination =
-                row.Destination?.trim();
-
-            if(!migrationIndex[destination]){
-                migrationIndex[destination] = [];
-            }
-
-            migrationIndex[destination].push({
-                origin: row.Origin.trim(),
-                number: Number(row.Number)
-            });
-
+// -------------------------
+// 🔹 Загрузка CSV через Promise
+// -------------------------
+function loadCSV(url) {
+    return new Promise((resolve, reject) => {
+        Papa.parse(url, {
+            download: true,
+            header: true,
+            delimiter: ';',
+            dynamicTyping: true,
+            complete: resolve,
+            error: reject
         });
+    });
+}
 
-        console.log(
-    Object.keys(migrationIndex).slice(0,10)
-);
-    }
-});
+// -------------------------
+// 🔹 Загрузка GeoJSON
+// -------------------------
+async function loadGeoJSON(url) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("GeoJSON load failed");
+    return await res.json();
+}
 
+// -------------------------
+// 🔹 Подготовка данных
+// -------------------------
+function buildMigrationIndex(rows) {
+    const index = {};
 
-fetch('data.geojson')
-    .then(response => response.json())
-    .then(data => {
+    rows.forEach(row => {
+        const destination = norm(row.Destination);
+        const origin = norm(row.Origin);
+        const number = Number(row.Number);
 
-        L.geoJSON(data, {
+        if (!destination || !origin) return;
+        if (!index[destination]) index[destination] = [];
 
-            style: {
-                color:'#666',
-                weight:1,
-                fillColor:'#e5e5e5',
-                fillOpacity:0.7
-            },
-
-            onEachFeature
-
-        }).addTo(map);
-
-        console.log(
-    Object.keys(regionLayers).slice(0,10)
-);
-
+        index[destination].push({ origin, number });
     });
 
-function onEachFeature(feature, layer){
-
-    const region =
-        feature.properties.prov_ENG;
-
-    regionLayers[region] = layer;
-
-    layer.on('click', onRegionClick);
-
-    layer.bindTooltip(region);
+    return index;
 }
-function getColor(value, max){
+
+// -------------------------
+// 🔹 Инициализация карты
+// -------------------------
+function initMap() {
+    map = L.map('map').setView([60, 90], 3);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+}
+
+// -------------------------
+// 🔹 GeoJSON обработка
+// -------------------------
+function onEachFeature(feature, layer) {
+    const region = norm(feature.properties.prov_ENG);
+
+    if (!region) return;
+
+    state.regionLayers[region] = layer;
+
+    layer.bindTooltip(feature.properties.prov_ENG);
+    layer.on('click', onRegionClick);
+}
+
+// -------------------------
+// 🔹 Цвет
+// -------------------------
+function getColor(value, max) {
+    if (!max) return '#FD8D3C';
 
     const k = value / max;
 
-    if(k > 0.8) return '#800026';
-    if(k > 0.6) return '#BD0026';
-    if(k > 0.4) return '#E31A1C';
-    if(k > 0.2) return '#FC4E2A';
+    if (k > 0.8) return '#800026';
+    if (k > 0.6) return '#BD0026';
+    if (k > 0.4) return '#E31A1C';
+    if (k > 0.2) return '#FC4E2A';
 
     return '#FD8D3C';
 }
-function resetStyles(){
 
-    Object.values(regionLayers)
-        .forEach(layer => {
-
-            layer.setStyle({
-                color:'#666',
-                weight:1,
-                fillColor:'#e5e5e5',
-                fillOpacity:0.7
-            });
-
+// -------------------------
+// 🔹 Сброс стилей
+// -------------------------
+function resetStyles() {
+    Object.values(state.regionLayers).forEach(layer => {
+        layer.setStyle({
+            color: '#666',
+            weight: 1,
+            fillColor: '#e5e5e5',
+            fillOpacity: 0.7
         });
+    });
 }
-function onRegionClick(e){
 
-      const destination =
-        e.target.feature.properties.prov_ENG;
+// -------------------------
+// 🔹 Клик по региону
+// -------------------------
+function onRegionClick(e) {
+    const destination = norm(e.target.feature.properties.prov_ENG);
 
-    console.log(
-        'Clicked:',
-        destination
-    );
-
-    console.log(
-        migrationIndex[destination]
-    );
+    const flows = state.migrationIndex[destination];
 
     resetStyles();
 
-    const flows =
-        migrationIndex[destination];
+    if (!flows) return;
 
-    if(!flows) return;
-
-    const maxNumber =
-        Math.max(
-            ...flows.map(
-                x => x.number
-            )
-        );
+    const maxNumber = Math.max(...flows.map(f => f.number || 0));
 
     flows.forEach(flow => {
-
-        const layer =
-            regionLayers[flow.origin];
-
-        if(!layer) return;
+        const layer = state.regionLayers[flow.origin];
+        if (!layer) return;
 
         layer.setStyle({
-            fillColor:
-                getColor(
-                    flow.number,
-                    maxNumber
-                ),
-            fillOpacity:0.8,
-            color:'#444',
-            weight:1
+            fillColor: getColor(flow.number, maxNumber),
+            fillOpacity: 0.8,
+            color: '#444',
+            weight: 1
         });
-
     });
 
     e.target.setStyle({
-        fillColor:'yellow',
-        fillOpacity:0.9,
-        color:'#000',
-        weight:3
+        fillColor: 'yellow',
+        fillOpacity: 0.9,
+        color: '#000',
+        weight: 3
     });
 }
+
+// -------------------------
+// 🔹 Основной запуск
+// -------------------------
+async function init() {
+    initMap();
+
+    try {
+        // 🔥 Параллельная загрузка данных
+        const [geoData, csvResult] = await Promise.all([
+            loadGeoJSON('data.geojson'),
+            loadCSV('Migration.csv')
+        ]);
+
+        state.geoData = geoData;
+        state.csvData = csvResult.data;
+
+        // 🔹 строим индекс (кешируем)
+        state.migrationIndex = buildMigrationIndex(state.csvData);
+
+        // 🔹 добавляем GeoJSON
+        L.geoJSON(geoData, {
+            style: {
+                color: '#666',
+                weight: 1,
+                fillColor: '#e5e5e5',
+                fillOpacity: 0.7
+            },
+            onEachFeature
+        }).addTo(map);
+
+        console.log("Loaded regions:", Object.keys(state.regionLayers).length);
+        console.log("Migration keys:", Object.keys(state.migrationIndex).length);
+
+    } catch (err) {
+        console.error("Init error:", err);
+    }
+}
+
+// 🔥 старт
+init();
 
 </script>
