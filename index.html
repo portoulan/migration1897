@@ -32,7 +32,7 @@
     position: absolute;
     top: 10px;
     left: 50px;
-    z-index: 1000;
+    z-index: 1200;
 
     display: flex;
     align-items: center;
@@ -68,7 +68,7 @@
 
 .value-label div {
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 700;
     color: #111;
     text-shadow: 0 0 3px white;
     white-space: nowrap;
@@ -197,7 +197,7 @@ function getColor(value, max) {
 
     const k = value / max;
 
-    if (k > 0.8) return '#800026';
+    if (k > 0.8) return '#7F1734';
     if (k > 0.6) return '#BD0026';
     if (k > 0.4) return '#E31A1C';
     if (k > 0.2) return '#FC4E2A';
@@ -267,7 +267,7 @@ function onRegionClick(e) {
     });
 
     e.target.setStyle({
-        fillColor: 'yellow',
+        fillColor: 'green',
         fillOpacity: 0.9,
         color: '#000',
         weight: 3
