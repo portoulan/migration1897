@@ -67,7 +67,7 @@
 }
 
 .value-label div {
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 700;
     color: #111;
     text-shadow: 0 0 3px white;
@@ -197,11 +197,11 @@ function getColor(value, max) {
 
     const k = value / max;
 
-    if (k > 0.8) return '#7F1734';
-    if (k > 0.6) return '#BD0026';
-    if (k > 0.4) return '#E31A1C';
-    if (k > 0.2) return '#FC4E2A';
-    if (k > 0.1) return '#FEB24C';
+    if(k > 0.8) return '#F16913';
+    if(k > 0.6) return '#FD8D3C';
+    if(k > 0.4) return '#FDAE6B';
+    if(k > 0.2) return '#FDD0A2';
+    if(k > 0.1) return '#FEE6CE';
 
     return '#FFEDA0';
 }
