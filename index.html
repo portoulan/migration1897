@@ -21,6 +21,13 @@
          alt="Russian flag">
 </div>
 
+<div id="info">
+
+    <!-- заголовок -->
+    <div id="title">t.me/portoulan</div>
+
+</div>
+
 <div id="map"></div>
 
 <style>
@@ -43,7 +50,7 @@
 path.leaflet-interactive:focus {
     outline: none !important;
 }
-.map-info {
+.info {
     background: rgba(255,255,255,0.9);
     padding: 8px 12px;
     border-radius: 4px;
@@ -100,19 +107,7 @@ path.leaflet-interactive:focus {
 
 <script>
 let map;
-const info = L.control({ position: 'bottomright' });
 
-info.onAdd = function () {
-
-    const div = L.DomUtil.create('div', 'map-info');
-
-    div.innerHTML = `
-        <b>Неместные уроженцы, 1897 г.</b><br>
-        Источник: Первая всеобщая перепись населения
-    `;
-
-    return div;
-};
 const state = {
     migrationIndex: {},
     regionLayers: {},
