@@ -28,6 +28,14 @@
     height: 100vh;
     width: 100%;
 }
+.region-label {
+    font-size: 28px;
+    font-weight: 700;
+    color: #000;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
 #header {
     position: absolute;
     top: 10px;
@@ -201,7 +209,7 @@ function getColor(value, max) {
     if(k > 0.6) return '#FF0000';
     if(k > 0.4) return '#FF4500';
     if(k > 0.2) return '#FF7F50';
-    if(k > 0.1) return '#FFE4B5';
+    if(k > 0.1) return '#F0E68C';
 
     return '#FFFACD';
 }
@@ -269,8 +277,8 @@ function onRegionClick(e) {
     e.target.setStyle({
         fillColor: 'green',
         fillOpacity: 0.7,
-        color: '#000',
-        weight: 3
+        color: 'transparent',
+        weight: 0
     });
 }
 
