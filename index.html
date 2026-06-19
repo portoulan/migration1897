@@ -302,6 +302,25 @@ function onEachFeature(feature, layer) {
     layer.bindTooltip(feature.properties.prov_ENG || "Unknown");
     layer.on('click', onRegionClick);
 }
+      
+function createLegend(max) {
+    const legend = document.getElementById('legend');
+
+    const steps = [0.8, 0.6, 0.4, 0.2, 0.1, 0.05, 0];
+
+    let html = "<b>Intensity</b><br>";
+
+    steps.forEach(s => {
+        html += `
+            <div>
+                <span style="background:${getColor(s * max, max)};width:12px;height:12px;display:inline-block"></span>
+                ${Math.round(s * 100)}%
+            </div>
+        `;
+    });
+
+    legend.innerHTML = html;
+}
 
 function renderTable(rows) {
     const container = document.getElementById('tablePanel');
@@ -339,33 +358,7 @@ function renderTable(rows) {
     container.innerHTML = html;
 }
       
-function createLegend() {
-    const legend = document.getElementById('legend');
-
-    const items = [
-        { color: '#B22222', label: '> 80%' },
-        { color: '#FF0000', label: '60–80%' },
-        { color: '#FF6347', label: '40–60%' },
-        { color: '#FF8C00', label: '20–40%' },
-        { color: '#FFD700', label: '10–20%' },
-        { color: '#F0E68C', label: '5–10%' },
-        { color: '#FFFACD', label: '< 5%' }
-    ];
-
-    let html = "<b>Legend</b><br>";
-
-    items.forEach(i => {
-        html += `
-            <div class="legend-item">
-                <div class="legend-box" style="background:${i.color}"></div>
-                <div>${i.label}</div>
-            </div>
-        `;
-    });
-
-    legend.innerHTML = html;
-}
-      
+     
 // -------------------------
 // 🔹 клик по региону
 // -------------------------
@@ -378,10 +371,6 @@ function onRegionClick(e) {
     // -------------------------
     const tableRows = state.csvData
         .filter(row => norm(row.Destination) === destKey)
-        .map(row => ({
-            Origin: row.Origin,
-            Number: row.Number
-        }))
         .sort((a, b) => (b.Number || 0) - (a.Number || 0));
 
     renderTable(tableRows);
@@ -430,6 +419,9 @@ function onRegionClick(e) {
         color: '#000',
         weight: 3
     });
+      
+    // 🔥 ВОТ СЮДА — ДИНАМИЧЕСКАЯ ЛЕГЕНДА
+    createLegend(maxNumber);
 }
 
 // -------------------------
