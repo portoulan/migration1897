@@ -24,7 +24,7 @@
 <div id="map"></div>
 
 <div id="footer">
-Источник: Первая всеобщая перепись населения Российской империи 1897 г.
+Egor D. t.me/portoulan
 </div>
 
 <style>
@@ -52,7 +52,7 @@
 
 #footer {
     position: absolute;
-    bottom: 10px;
+    bottom: 2px;
     right: 10px;
     z-index: 1000;
 
@@ -216,7 +216,7 @@ function getColor(value, max) {
     const k = value / max;
 
     const start = [255, 245, 235]; // светлый
-    const end   = [178, 34, 34];   // красный
+    const end   = [220, 50, 32];   // красный
 
     const r = Math.round(start[0] + (end[0] - start[0]) * k);
     const g = Math.round(start[1] + (end[1] - start[1]) * k);
