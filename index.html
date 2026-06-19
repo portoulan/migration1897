@@ -27,6 +27,8 @@
 Egor D. t.me/portoulan
 </div>
 
+<div id="tablePanel"></div>
+
 <style>
 #map {
     height: 100vh;
@@ -63,6 +65,23 @@ Egor D. t.me/portoulan
     border-radius: 4px;
 
     box-shadow: 0 0 4px rgba(0,0,0,0.2);
+}
+
+#tablePanel {
+    position: absolute;
+    left: 10px;
+    bottom: 40px;
+    z-index: 1500;
+
+    background: rgba(255,255,255,0.95);
+    padding: 10px;
+    border-radius: 8px;
+
+    max-height: 40vh;
+    overflow: auto;
+
+    font-family: sans-serif;
+    font-size: 13px;
 }
       
 #title {
@@ -253,40 +272,63 @@ function onEachFeature(feature, layer) {
     layer.bindTooltip(feature.properties.prov_ENG || "Unknown");
     layer.on('click', onRegionClick);
 }
+function renderTable(rows) {
+    const container = document.getElementById('tablePanel');
 
+    if (!rows || !rows.length) {
+        container.innerHTML = "<b>Нет данных</b>";
+        return;
+    }
+
+    let html = `
+        <table border="1" cellspacing="0" cellpadding="4">
+            <thead>
+                <tr>
+                    <th>Origin</th>
+                    <th>Destination</th>
+                    <th>Number</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    rows.forEach(r => {
+        html += `
+            <tr>
+                <td>${r.Origin}</td>
+                <td>${r.Destination}</td>
+                <td>${r.Number}</td>
+            </tr>
+        `;
+    });
+
+    html += "</tbody></table>";
+
+    container.innerHTML = html;
+}
+      
+
+      
 // -------------------------
 // 🔹 клик по региону
 // -------------------------
 function onRegionClick(e) {
-    const destination = norm(e.target.feature.properties.prov_ENG);
-    const flows = state.migrationIndex[destination];
+    const originName = e.target.feature.properties.prov_ENG;
+
+    const filtered = state.csvData.filter(row =>
+        norm(row.Origin) === norm(originName)
+    );
 
     resetStyles();
     clearValueLabels();
 
-    if (!flows || !flows.length) return;
-
-    const values = flows.map(f => f.number || 0);
-    const maxNumber = values.length ? Math.max(...values) : 0;
-
-    flows.forEach(flow => {
-        const layer = state.regionLayers[flow.origin];
-        if (!layer) return;
-
-        layer.setStyle({
-            fillColor: getColor(flow.number, maxNumber),
-            fillOpacity: 0.75,
-            color: '#444',
-            weight: 2
-        });
-
-    });
+    renderTable(filtered);
 
     e.target.setStyle({
         fillColor: 'green',
         fillOpacity: 0.75,
         color: '#000',
-        weight: 3
+        weight: 1
     });
 }
 
