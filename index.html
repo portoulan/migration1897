@@ -376,9 +376,13 @@ function onRegionClick(e) {
     // -------------------------
     // 1. ТАБЛИЦА (Origin → Destination rows)
     // -------------------------
-    const tableRows = state.csvData.filter(row =>
-        norm(row.Destination) === destKey
-    );
+    const tableRows = state.csvData
+        .filter(row => norm(row.Destination) === destKey)
+        .map(row => ({
+            Origin: row.Origin,
+            Number: row.Number
+        }))
+        .sort((a, b) => (b.Number || 0) - (a.Number || 0));
 
     renderTable(tableRows);
 
