@@ -370,53 +370,59 @@ function createLegend() {
 // 🔹 клик по региону
 // -------------------------
 function onRegionClick(e) {
-    const originName = e.target.feature.properties.prov_ENG;
+    const destinationName = e.target.feature.properties.prov_ENG;
+    const destKey = norm(destinationName);
 
     // -------------------------
-    // 1. ТАБЛИЦА (по Origin)
+    // 1. ТАБЛИЦА (Origin → Destination rows)
     // -------------------------
     const tableRows = state.csvData.filter(row =>
-        norm(row.Origin) === norm(originName)
+        norm(row.Destination) === destKey
     );
 
     renderTable(tableRows);
 
     // -------------------------
-    // 2. РАСКРАСКА (по Destination flows)
+    // 2. ПОЛУЧАЕМ FLOWS (Origin → Destination)
     // -------------------------
-    const destination = norm(originName);
-    const flows = state.migrationIndex[destination];
+    const flows = state.migrationIndex[destKey];
 
     resetStyles();
     clearValueLabels();
 
-    if (!flows || !flows.length) return;
-
-    const maxNumber = Math.max(...flows.map(f => f.number || 0));
-
-    flows.forEach(flow => {
-        const layer = state.regionLayers[flow.origin];
-        if (!layer) return;
-
-        layer.setStyle({
-            fillColor: getColor(flow.number, maxNumber),
-            fillOpacity: 0.75,
-            color: '#444',
-            weight: 2
-        });
-
-        const center = getSafeCenter(layer);
-        if (center) {
-            createLabel(center, flow.number);
-        }
-    });
+    let maxNumber = 0;
+    if (flows && flows.length) {
+        maxNumber = Math.max(...flows.map(f => f.number || 0));
+    }
 
     // -------------------------
-    // 3. выделение выбранного региона
+    // 3. РАСКРАСКА ВСЕХ POLYGONS ПО ORIGIN → DESTINATION
+    // -------------------------
+    if (flows && flows.length) {
+        flows.forEach(flow => {
+            const originLayer = state.regionLayers[flow.origin];
+            if (!originLayer) return;
+
+            originLayer.setStyle({
+                fillColor: getColor(flow.number, maxNumber),
+                fillOpacity: 0.75,
+                color: '#444',
+                weight: 2
+            });
+
+            const center = getSafeCenter(originLayer);
+            if (center) {
+                createLabel(center, flow.number);
+            }
+        });
+    }
+
+    // -------------------------
+    // 4. ПОДСВЕТКА ВЫБРАННОГО DESTINATION
     // -------------------------
     e.target.setStyle({
         fillColor: 'green',
-        fillOpacity: 0.8,
+        fillOpacity: 0.85,
         color: '#000',
         weight: 3
     });
