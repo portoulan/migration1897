@@ -372,20 +372,53 @@ function createLegend() {
 function onRegionClick(e) {
     const originName = e.target.feature.properties.prov_ENG;
 
-    const filtered = state.csvData.filter(row =>
+    // -------------------------
+    // 1. ТАБЛИЦА (по Origin)
+    // -------------------------
+    const tableRows = state.csvData.filter(row =>
         norm(row.Origin) === norm(originName)
     );
+
+    renderTable(tableRows);
+
+    // -------------------------
+    // 2. РАСКРАСКА (по Destination flows)
+    // -------------------------
+    const destination = norm(originName);
+    const flows = state.migrationIndex[destination];
 
     resetStyles();
     clearValueLabels();
 
-    renderTable(filtered);
+    if (!flows || !flows.length) return;
 
+    const maxNumber = Math.max(...flows.map(f => f.number || 0));
+
+    flows.forEach(flow => {
+        const layer = state.regionLayers[flow.origin];
+        if (!layer) return;
+
+        layer.setStyle({
+            fillColor: getColor(flow.number, maxNumber),
+            fillOpacity: 0.75,
+            color: '#444',
+            weight: 2
+        });
+
+        const center = getSafeCenter(layer);
+        if (center) {
+            createLabel(center, flow.number);
+        }
+    });
+
+    // -------------------------
+    // 3. выделение выбранного региона
+    // -------------------------
     e.target.setStyle({
         fillColor: 'green',
-        fillOpacity: 0.75,
+        fillOpacity: 0.8,
         color: '#000',
-        weight: 1
+        weight: 3
     });
 }
 
