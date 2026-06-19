@@ -280,10 +280,6 @@ function onRegionClick(e) {
             weight: 2
         });
 
-        const center = getSafeCenter(layer);
-        if (!center) return;
-
-        createLabel(center, flow.number);
     });
 
     e.target.setStyle({
