@@ -67,6 +67,8 @@ Egor D. t.me/portoulan
     box-shadow: 0 0 4px rgba(0,0,0,0.2);
 }
 
+<div id="legend"></div>
+
 #tablePanel {
     position: absolute;
     left: 10px;
@@ -83,6 +85,36 @@ Egor D. t.me/portoulan
     font-family: sans-serif;
     font-size: 13px;
 }
+
+#legend {
+    position: absolute;
+    right: 10px;
+    top: 120px;
+    z-index: 1500;
+
+    background: rgba(255,255,255,0.9);
+    padding: 10px;
+    border-radius: 8px;
+
+    font-family: sans-serif;
+    font-size: 12px;
+
+    box-shadow: 0 1px 6px rgba(0,0,0,0.2);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.legend-box {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #999;
+}
+
       
 #title {
     font-size: 20px;
@@ -272,6 +304,7 @@ function onEachFeature(feature, layer) {
     layer.bindTooltip(feature.properties.prov_ENG || "Unknown");
     layer.on('click', onRegionClick);
 }
+
 function renderTable(rows) {
     const container = document.getElementById('tablePanel');
 
@@ -280,11 +313,13 @@ function renderTable(rows) {
         return;
     }
 
+    // 🔥 сортировка по Number (по убыванию)
+    const sorted = [...rows].sort((a, b) => (b.Number || 0) - (a.Number || 0));
+
     let html = `
         <table border="1" cellspacing="0" cellpadding="4">
             <thead>
                 <tr>
-                    <th>Origin</th>
                     <th>Destination</th>
                     <th>Number</th>
                 </tr>
@@ -292,10 +327,9 @@ function renderTable(rows) {
             <tbody>
     `;
 
-    rows.forEach(r => {
+    sorted.forEach(r => {
         html += `
             <tr>
-                <td>${r.Origin}</td>
                 <td>${r.Destination}</td>
                 <td>${r.Number}</td>
             </tr>
@@ -307,7 +341,32 @@ function renderTable(rows) {
     container.innerHTML = html;
 }
       
+function createLegend() {
+    const legend = document.getElementById('legend');
 
+    const items = [
+        { color: '#B22222', label: '> 80%' },
+        { color: '#FF0000', label: '60–80%' },
+        { color: '#FF6347', label: '40–60%' },
+        { color: '#FF8C00', label: '20–40%' },
+        { color: '#FFD700', label: '10–20%' },
+        { color: '#F0E68C', label: '5–10%' },
+        { color: '#FFFACD', label: '< 5%' }
+    ];
+
+    let html = "<b>Legend</b><br>";
+
+    items.forEach(i => {
+        html += `
+            <div class="legend-item">
+                <div class="legend-box" style="background:${i.color}"></div>
+                <div>${i.label}</div>
+            </div>
+        `;
+    });
+
+    legend.innerHTML = html;
+}
       
 // -------------------------
 // 🔹 клик по региону
