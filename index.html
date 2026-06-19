@@ -212,17 +212,18 @@ function createLabel(latlng, value) {
 // 🔹 цвет
 // -------------------------
 function getColor(value, max) {
+    if (!max) return '#B22222';
 
     const k = value / max;
 
-    const start = [255, 245, 235]; // светлый
-    const end   = [220, 50, 32];   // красный
+    if(k > 0.8) return '#B22222';
+    if(k > 0.6) return '#FF0000';
+    if(k > 0.4) return '#FF6347';
+    if(k > 0.2) return '#FF8C00';
+    if(k > 0.1) return '#FFD700';
+    if(k > 0.05) return '#FFE4B5';
 
-    const r = Math.round(start[0] + (end[0] - start[0]) * k);
-    const g = Math.round(start[1] + (end[1] - start[1]) * k);
-    const b = Math.round(start[2] + (end[2] - start[2]) * k);
-
-    return `rgb(${r},${g},${b})`;
+    return '#FFFACD';
 }
 
 // -------------------------
