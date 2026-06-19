@@ -337,7 +337,7 @@ function renderTable(rows) {
         <table border="1" cellspacing="0" cellpadding="4">
             <thead>
                 <tr>
-                    <th>Destination</th>
+                    <th>Origin</th>
                     <th>Number</th>
                 </tr>
             </thead>
@@ -347,7 +347,7 @@ function renderTable(rows) {
     sorted.forEach(r => {
         html += `
             <tr>
-                <td>${r.Destination}</td>
+                <td>${r.Origin}</td>
                 <td>${r.Number}</td>
             </tr>
         `;
