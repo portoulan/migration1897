@@ -67,7 +67,7 @@
 }
 
 .value-label div {
-    font-size: 20px;
+    font-size: 12px;
     font-weight: 700;
     color: #111;
     text-shadow: 0 0 3px white;
@@ -193,17 +193,17 @@ function createLabel(latlng, value) {
 // 🔹 цвет
 // -------------------------
 function getColor(value, max) {
-    if (!max) return '#C71585';
+    if (!max) return '#8B008B';
 
     const k = value / max;
 
-    if(k > 0.8) return '#C71585';
-    if(k > 0.6) return '#FF0000';
+    if(k > 0.8) return '#8B008B';
+    if(k > 0.6) return '#B22222';
     if(k > 0.4) return '#FF4500';
-    if(k > 0.2) return '#FF7F50';
-    if(k > 0.1) return '#FFE4B5';
+    if(k > 0.2) return '#FF8C00';
+    if(k > 0.1) return '#FFD700';
 
-    return '#FFFACD';
+    return '#FFFFE0';
 }
 
 // -------------------------
@@ -215,7 +215,7 @@ function resetStyles() {
             color: '#666',
             weight: 1,
             fillColor: '#e5e5e5',
-            fillOpacity: 0.7
+            fillOpacity: 0.75
         });
     });
 }
@@ -255,7 +255,7 @@ function onRegionClick(e) {
 
         layer.setStyle({
             fillColor: getColor(flow.number, maxNumber),
-            fillOpacity: 0.8,
+            fillOpacity: 0.75,
             color: '#444',
             weight: 2
         });
@@ -268,7 +268,7 @@ function onRegionClick(e) {
 
     e.target.setStyle({
         fillColor: 'green',
-        fillOpacity: 0.8,
+        fillOpacity: 0.75,
         color: '#000',
         weight: 3
     });
@@ -296,7 +296,7 @@ async function init() {
                 color: '#666',
                 weight: 1,
                 fillColor: '#e5e5e5',
-                fillOpacity: 0.7
+                fillOpacity: 0.75
             },
             onEachFeature
         }).addTo(map);
