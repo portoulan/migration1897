@@ -289,7 +289,7 @@ function getColor(value, max) {
     if(k > 0.4) return '#F5751D';
     if(k > 0.2) return '#FB973C';
     if(k > 0.1) return '#F9C571';
-    if(k > 0.02) return '#F8E799';
+    if(k > 0.03) return '#F8E799';
 
     return '#FFFFE0';
 }
@@ -325,7 +325,7 @@ function onEachFeature(feature, layer) {
 function createLegend(max) {
     const legend = document.getElementById('legend');
 
-    const steps = [0.8, 0.6, 0.4, 0.2, 0.1, 0.05, 0];
+    const steps = [0.8, 0.6, 0.4, 0.2, 0.1, 0.03, 0];
 
     let html = "<b>Intensity</b><br>";
 
@@ -357,7 +357,7 @@ function renderTable(rows) {
             <thead>
                 <tr>
                     <th>Место рождения</th>
-                    <th>Число</th>
+                    <th>Количество</th>
                 </tr>
             </thead>
             <tbody>
@@ -422,7 +422,7 @@ renderTable(tableRows);
                 fillColor: getColor(flow.number, maxNumber),
                 fillOpacity: 0.75,
                 color: '#444',
-                weight: 2
+                weight: 1
             });
 
       //      const center = getSafeCenter(originLayer);
@@ -439,7 +439,7 @@ renderTable(tableRows);
         fillColor: 'green',
         fillOpacity: 0.85,
         color: '#000',
-        weight: 3
+        weight: 1
     });
       
     // 🔥 ВОТ СЮДА — ДИНАМИЧЕСКАЯ ЛЕГЕНДА
