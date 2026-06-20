@@ -344,14 +344,14 @@ function renderTable(rows) {
             <tbody>
     `;
 
-    sorted.forEach(r => {
-        html += `
-            <tr>
-                <td>${r.Губерния рождения}</td>
-                <td>${r.Число}</td>
-            </tr>
-        `;
-    });
+sorted.forEach(r => {
+    html += `
+        <tr>
+            <td>${capitalize(r.Origin)}</td>
+            <td>${r.Number}</td>
+        </tr>
+    `;
+});
 
     html += "</tbody></table>";
 
