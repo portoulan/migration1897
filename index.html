@@ -294,6 +294,40 @@ function getColor(value, max) {
     return '#FFFFE0';
 }
 
+function createLegend(max) {
+    const legend = document.getElementById('legend');
+
+    if (!max) {
+        legend.innerHTML = "";
+        return;
+    }
+
+    const breaks = [
+        max,
+        max * 0.8,
+        max * 0.6,
+        max * 0.4,
+        max * 0.2,
+        max * 0.1,
+        0
+    ];
+
+    let html = "<b>Число уроженцев</b>";
+
+    for (let i = 0; i < breaks.length - 1; i++) {
+        const upper = Math.round(breaks[i]);
+        const lower = Math.round(breaks[i + 1]);
+
+        html += `
+            <div class="legend-item">
+                <div class="legend-box"
+                     style="background:${getColor(upper, max)}">
+                </div>
+                <span>${lower.toLocaleString('ru-RU')} – ${upper.toLocaleString('ru-RU')}</span>
+            </div>
+        `;
+    }
+
 // -------------------------
 // 🔹 сброс стилей
 // -------------------------
