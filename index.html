@@ -331,32 +331,36 @@ function createLegend(max) {
         return;
     }
 
-    const breaks = [
-        max,
-        max * 0.8,
-        max * 0.6,
-        max * 0.4,
-        max * 0.2,
-        max * 0.1,
-        max * 0.03,
-        0
+    const classes = [
+        { color:'#A60000', from:0.8, to:1.0 },
+        { color:'#D03F10', from:0.6, to:0.8 },
+        { color:'#F5751D', from:0.4, to:0.6 },
+        { color:'#FB973C', from:0.2, to:0.4 },
+        { color:'#F9C571', from:0.1, to:0.2 },
+        { color:'#F8E799', from:0.03, to:0.1 },
+        { color:'#FFFFE0', from:0.0, to:0.03 }
     ];
 
     let html = "<b>Число уроженцев</b>";
 
-    for (let i = 0; i < breaks.length - 1; i++) {
-        const upper = Math.round(breaks[i]);
-        const lower = Math.round(breaks[i + 1]);
+    classes.forEach(c => {
+
+        const minValue = Math.round(c.from * max);
+        const maxValue = Math.round(c.to * max);
 
         html += `
             <div class="legend-item">
                 <div class="legend-box"
-                     style="background:${getColor(upper, max)}">
+                     style="background:${c.color}">
                 </div>
-                <span>${lower.toLocaleString('ru-RU')} – ${upper.toLocaleString('ru-RU')}</span>
+                <span>
+                    ${minValue.toLocaleString('ru-RU')}
+                    –
+                    ${maxValue.toLocaleString('ru-RU')}
+                </span>
             </div>
         `;
-    }
+    });
 
     legend.innerHTML = html;
 }
