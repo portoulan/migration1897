@@ -294,6 +294,35 @@ function getColor(value, max) {
     return '#FFFFE0';
 }
 
+
+// -------------------------
+// 🔹 сброс стилей
+// -------------------------
+function resetStyles() {
+    Object.values(state.regionLayers).forEach(layer => {
+        layer.setStyle({
+            color: '#666',
+            weight: 1,
+            fillColor: '#e5e5e5',
+            fillOpacity: 0.8
+        });
+    });
+}
+
+// -------------------------
+// 🔹 GeoJSON обработка
+// -------------------------
+function onEachFeature(feature, layer) {
+    const region = norm(feature.properties.prov_ENG);
+
+    if (!region) return;
+
+    state.regionLayers[region] = layer;
+
+    layer.bindTooltip(feature.properties.prov_ENG || "Unknown");
+    layer.on('click', onRegionClick);
+}
+      
 function createLegend(max) {
     const legend = document.getElementById('legend');
 
@@ -327,50 +356,6 @@ function createLegend(max) {
             </div>
         `;
     }
-
-// -------------------------
-// 🔹 сброс стилей
-// -------------------------
-function resetStyles() {
-    Object.values(state.regionLayers).forEach(layer => {
-        layer.setStyle({
-            color: '#666',
-            weight: 1,
-            fillColor: '#e5e5e5',
-            fillOpacity: 0.8
-        });
-    });
-}
-
-// -------------------------
-// 🔹 GeoJSON обработка
-// -------------------------
-function onEachFeature(feature, layer) {
-    const region = norm(feature.properties.prov_ENG);
-
-    if (!region) return;
-
-    state.regionLayers[region] = layer;
-
-    layer.bindTooltip(feature.properties.prov_ENG || "Unknown");
-    layer.on('click', onRegionClick);
-}
-      
-function createLegend(max) {
-    const legend = document.getElementById('legend');
-
-    const steps = [0.8, 0.6, 0.4, 0.2, 0.1, 0.03, 0];
-
-    let html = "<b>Intensity</b><br>";
-
-    steps.forEach(s => {
-        html += `
-            <div>
-                <span style="background:${getColor(s * max, max)};width:12px;height:12px;display:inline-block"></span>
-                ${Math.round(s * 100)}%
-            </div>
-        `;
-    });
 
     legend.innerHTML = html;
 }
