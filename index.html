@@ -151,6 +151,7 @@ const state = {
     regionLayers: {},
     geoData: null,
     csvData: null,
+    regionNames: {},
     valueLabels: []
 };
 
@@ -167,6 +168,16 @@ function norm(str) {
 function capitalize(str) {
     if (!str) return "";
     return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function buildRegionNames(rows) {
+    const index = {};
+
+    rows.forEach(row => {
+        index[norm(row.Short)] = row.Full;
+    });
+
+    return index;
 }
       
 // -------------------------
@@ -226,7 +237,10 @@ function initMap() {
         attribution: '© OpenStreetMap'
     }).addTo(map);
 }
-
+state.regionNames = buildRegionNames(regionResult.data);
+function getRegionDisplayName(name) {
+    return state.regionNames[norm(name)] || name;
+}
 // -------------------------
 // 🔹 очистка labels
 // -------------------------
@@ -275,7 +289,7 @@ function getColor(value, max) {
     if(k > 0.4) return '#F5751D';
     if(k > 0.2) return '#FB973C';
     if(k > 0.1) return '#F9C571';
-    if(k > 0.05) return '#F8E799';
+    if(k > 0.02) return '#F8E799';
 
     return '#FFFFE0';
 }
@@ -352,7 +366,7 @@ function renderTable(rows) {
 sorted.forEach(r => {
     html += `
         <tr>
-            <td>${capitalize(r.Origin)}</td>
+            <td>${getRegionDisplayName(r.Origin)}</td>
             <td>${r.Number}</td>
         </tr>
     `;
