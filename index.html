@@ -375,7 +375,10 @@ const tableRows = (state.migrationIndex[destKey] || [])
         Number: flow.number
     }))
     .sort((a, b) => b.Number - a.Number);
-
+function capitalize(str) {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
 renderTable(tableRows);
 
     // -------------------------
