@@ -392,14 +392,14 @@ renderTable(tableRows);
     clearValueLabels();
 
     let maxNumber = 0;
-    if (flows && flows.leng) {
-        maxNumber = Ma.max(...flows.map(f => f.number || 0));
+    if (flows && flows.length) {
+        maxNumber = Math.max(...flows.map(f => f.number || 0));
     }
 
     // -------------------------
     // 3. РАСКРАСКА ВСЕХ POLYGONS ПО ORIGIN → DESTINATION
     // -------------------------
-    if (flows && flows.leng) {
+    if (flows && flows.length) {
         flows.forEach(flow => {
             const originLayer = state.regionLayers[flow.origin];
             if (!originLayer) return;
@@ -410,6 +410,11 @@ renderTable(tableRows);
                 color: '#444',
                 weight: 2
             });
+
+            const center = getSafeCenter(originLayer);
+            if (center) {
+                createLabel(center, flow.number);
+            }
         });
     }
 
