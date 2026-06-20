@@ -265,14 +265,14 @@ function getColor(value, max) {
 
     const k = value / max;
 
-    if(k > 0.8) return '#B22222';
-    if(k > 0.6) return '#FF0000';
-    if(k > 0.4) return '#FF6347';
-    if(k > 0.2) return '#FF8C00';
-    if(k > 0.1) return '#FFD700';
-    if(k > 0.05) return '#F0E68C';
+    if(k > 0.8) return '#A60000';
+    if(k > 0.6) return '#D03F10';
+    if(k > 0.4) return '#F5751D';
+    if(k > 0.2) return '#FB973C';
+    if(k > 0.1) return '#F9C571';
+    if(k > 0.05) return '#F8E799';
 
-    return '#FFFACD';
+    return '#FFFFE0';
 }
 
 // -------------------------
@@ -321,10 +321,7 @@ function createLegend(max) {
 
     legend.innerHTML = html;
 }
-function capitalize(str) {
-    if (!str) return "";
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
+
 function renderTable(rows) {
     const container = document.getElementById('tablePanel');
 
