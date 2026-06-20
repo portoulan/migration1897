@@ -164,6 +164,11 @@ function norm(str) {
         .toLowerCase();
 }
 
+function capitalize(str) {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+      
 // -------------------------
 // 🔹 CSV loader
 // -------------------------
@@ -337,8 +342,8 @@ function renderTable(rows) {
         <table border="1" cellspacing="0" cellpadding="4">
             <thead>
                 <tr>
-                    <th>Origin</th>
-                    <th>Number</th>
+                    <th>Место рождения</th>
+                    <th>Число</th>
                 </tr>
             </thead>
             <tbody>
@@ -375,10 +380,7 @@ const tableRows = (state.migrationIndex[destKey] || [])
         Number: flow.number
     }))
     .sort((a, b) => b.Number - a.Number);
-function capitalize(str) {
-    if (!str) return "";
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
+
 renderTable(tableRows);
 
     // -------------------------
@@ -390,14 +392,14 @@ renderTable(tableRows);
     clearValueLabels();
 
     let maxNumber = 0;
-    if (flows && flows.length) {
-        maxNumber = Math.max(...flows.map(f => f.number || 0));
+    if (flows && flows.leng) {
+        maxNumber = Ma.max(...flows.map(f => f.number || 0));
     }
 
     // -------------------------
     // 3. РАСКРАСКА ВСЕХ POLYGONS ПО ORIGIN → DESTINATION
     // -------------------------
-    if (flows && flows.length) {
+    if (flows && flows.leng) {
         flows.forEach(flow => {
             const originLayer = state.regionLayers[flow.origin];
             if (!originLayer) return;
@@ -452,8 +454,8 @@ async function init() {
             onEachFeature
         }).addTo(map);
 
-        console.log("Regions:", Object.keys(state.regionLayers).length);
-        console.log("Migration groups:", Object.keys(state.migrationIndex).length);
+        console.log("Regions:", Object.keys(state.regionLayers).leng);
+        console.log("Migration groups:", Object.keys(state.migrationIndex).leng);
 
     } catch (err) {
         console.error("Init error:", err);
