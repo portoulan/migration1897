@@ -321,7 +321,10 @@ function createLegend(max) {
 
     legend.innerHTML = html;
 }
-
+function capitalize(str) {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
 function renderTable(rows) {
     const container = document.getElementById('tablePanel');
 
@@ -347,8 +350,8 @@ function renderTable(rows) {
     sorted.forEach(r => {
         html += `
             <tr>
-                <td>${r.Origin}</td>
-                <td>${r.Number}</td>
+                <td>${r.Губерния рождения}</td>
+                <td>${r._}</td>
             </tr>
         `;
     });
