@@ -369,11 +369,14 @@ function onRegionClick(e) {
     // -------------------------
     // 1. ТАБЛИЦА (Origin → Destination rows)
     // -------------------------
-    const tableRows = state.csvData
-        .filter(row => norm(row.Origin) === destKey)
-        .sort((a, b) => (b.Number || 0) - (a.Number || 0));
+const tableRows = (state.migrationIndex[destKey] || [])
+    .map(flow => ({
+        Origin: flow.origin,
+        Number: flow.number
+    }))
+    .sort((a, b) => b.Number - a.Number);
 
-    renderTable(tableRows);
+renderTable(tableRows);
 
     // -------------------------
     // 2. ПОЛУЧАЕМ FLOWS (Origin → Destination)
