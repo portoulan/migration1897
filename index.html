@@ -237,7 +237,7 @@ function initMap() {
         attribution: '© OpenStreetMap'
     }).addTo(map);
 }
-state.regionNames = buildRegionNames(regionResult.data);
+
 function getRegionDisplayName(name) {
     return state.regionNames[norm(name)] || name;
 }
