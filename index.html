@@ -475,8 +475,8 @@ const [geoData, csvResult, regionResult] = await Promise.all([
             onEachFeature
         }).addTo(map);
 
-        console.log("Regions:", Object.keys(state.regionLayers).leng);
-        console.log("Migration groups:", Object.keys(state.migrationIndex).leng);
+console.log("Regions:", Object.keys(state.regionLayers).length);
+console.log("Migration groups:", Object.keys(state.migrationIndex).length);
 
     } catch (err) {
         console.error("Init error:", err);
