@@ -453,15 +453,17 @@ async function init() {
     initMap();
 
     try {
-        const [geoData, csvResult] = await Promise.all([
-            loadGeoJSON('data.geojson'),
-            loadCSV('Migration.csv')
-        ]);
+const [geoData, csvResult, regionResult] = await Promise.all([
+    loadGeoJSON('data.geojson'),
+    loadCSV('Migration.csv'),
+    loadCSV('regions.csv')
+]);
 
         state.geoData = geoData;
         state.csvData = csvResult.data;
 
         state.migrationIndex = buildMigrationIndex(state.csvData);
+        state.regionNames = buildRegionNames(regionResult.data);
 
         L.geoJSON(geoData, {
             style: {
