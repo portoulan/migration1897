@@ -114,7 +114,7 @@ Egor D.   t.me/portoulan
 }
 
 .leaflet-tooltip {
-    font-size: 18px !important;
+    font-size: 12px !important;
     font-weight: bold;
     padding: 6px 10px;
 }
@@ -415,10 +415,9 @@ sorted.forEach(r => {
 // 🔹 клик по региону
 // -------------------------
 function onRegionClick(e) {
-    document.activeElement.blur();
     const destinationName = e.target.feature.properties.prov_ENG;
     const destKey = norm(destinationName);
-
+    document.activeElement.blur();
     // -------------------------
     // 1. ТАБЛИЦА (Origin → Destination rows)
     // -------------------------
