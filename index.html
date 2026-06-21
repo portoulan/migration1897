@@ -415,6 +415,7 @@ sorted.forEach(r => {
 // 🔹 клик по региону
 // -------------------------
 function onRegionClick(e) {
+    document.activeElement.blur();
     const destinationName = e.target.feature.properties.prov_ENG;
     const destKey = norm(destinationName);
 
